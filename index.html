@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>고려 문화 탐구실</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: 상단 탭(글 읽기 · 보고서 쓰기 · 완성) + 본문. 보고서 쓰기는 넓은 화면에서 왼쪽 글 / 오른쪽 문항. 청자 빛 종이, 강조는 상감 흙빛. */
+:root{
+  --bg:#ecf2ee; --paper:#fbfcfa; --ink:#1e2926; --muted:#5b6c66;
+  --celadon:#3f7f6e; --celadon-soft:#d5e6df; --clay:#94553a; --clay-soft:#f3e3d9;
+  --hl:#fbe9a6; --line:#c9d8d1; --ok:#2f7a4a;
+  --f-display:"Gowun Batang","Noto Serif KR","AppleMyungjo",serif;
+  --f-body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111816; --paper:#18221f; --ink:#e3ebe7; --muted:#9db0a9;
+  --celadon:#7cc1ac; --celadon-soft:#21362f; --clay:#d79c7b; --clay-soft:#3a2a22;
+  --hl:#4a4020; --line:#2c3d38; --ok:#73c48f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111816; --paper:#18221f; --ink:#e3ebe7; --muted:#9db0a9;
+  --celadon:#7cc1ac; --celadon-soft:#21362f; --clay:#d79c7b; --clay-soft:#3a2a22;
+  --hl:#4a4020; --line:#2c3d38; --ok:#73c48f; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.7}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 60px}
+h1{font-family:var(--f-display);font-size:clamp(26px,5vw,36px);margin:0 0 14px;letter-spacing:-.01em;text-wrap:balance}
+h1 small{display:block;font-family:var(--f-body);font-size:14px;color:var(--muted);letter-spacing:.04em;margin-bottom:2px}
+h2{font-family:var(--f-display);font-size:24px;margin:0;text-wrap:balance}
+h3{font-family:var(--f-display);font-size:20px;margin:0;text-wrap:balance}
+p{margin:0}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:2px solid var(--line);margin-bottom:22px}
+.tab{appearance:none;border:0;background:none;font:inherit;font-size:17px;color:var(--muted);padding:10px 14px;border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--celadon);border-bottom-color:var(--celadon);font-weight:700}
+:focus-visible{outline:3px solid var(--clay);outline-offset:2px}
+.lead{color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.topic{appearance:none;font:inherit;color:inherit;text-align:left;background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;cursor:pointer;min-width:0}
+.topic:hover{border-color:var(--celadon)}
+.topic .tag,.article .tag{font-size:13px;color:var(--clay);letter-spacing:.06em}
+.topic .teaser{font-size:15px;color:var(--muted);line-height:1.5}
+.topic.chosen{border-color:var(--celadon);box-shadow:0 0 0 2px var(--celadon-soft)}
+.topic.chosen .tag::after{content:" · 내 주제";color:var(--celadon);font-weight:700}
+.article{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:22px clamp(16px,4vw,32px);display:flex;flex-direction:column;gap:14px;min-width:0}
+.article h2{font-size:clamp(22px,4vw,28px)}
+.article p{max-width:38em;line-height:1.95;font-size:17.5px}
+.article .s{border-radius:4px;transition:background .15s}
+.picking .article .s{cursor:pointer;text-decoration:underline dotted var(--line);text-underline-offset:5px}
+.picking .article .s:hover{background:var(--celadon-soft)}
+.article .s.used{background:var(--hl)}
+.bar{position:sticky;bottom:0;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:5}
+.btn{appearance:none;font:inherit;font-size:16px;border-radius:8px;padding:10px 16px;border:1.5px solid var(--celadon);background:var(--celadon);color:var(--paper);cursor:pointer;font-weight:700;text-decoration:none;display:inline-block}
+.btn.ghost{background:transparent;color:var(--celadon)}
+.btn.small{font-size:14px;padding:6px 10px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+.split .reader{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;border-radius:10px}
+@media (max-width:860px){.split{grid-template-columns:1fr}.split .reader{position:static;max-height:none}}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.row{display:flex;flex-wrap:wrap;gap:12px}
+.row label{display:flex;flex-direction:column;gap:4px;font-size:15px;color:var(--muted);flex:1 1 90px}
+input[type=text],input[type=number],input[type=password],textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:8px;padding:10px 12px;width:100%}
+textarea{min-height:72px;resize:vertical;line-height:1.55}
+.qcard{background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.qcard.active{border-color:var(--celadon);box-shadow:0 0 0 2px var(--celadon-soft)}
+.qhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.qhead b{font-family:var(--f-display);font-size:18px;color:var(--celadon)}
+.qhead .badge{font-size:13px;color:var(--clay);background:var(--clay-soft);border-radius:999px;padding:1px 9px}
+.qtext{font-family:var(--f-display);font-size:19px;font-weight:700;line-height:1.5}
+.step{display:flex;flex-direction:column;gap:6px}
+.step > .lab{font-weight:700;font-size:16px}
+.step .sub{font-size:14px;color:var(--muted);font-weight:400}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--line);border-radius:8px;padding:9px 12px;cursor:pointer;background:var(--bg);line-height:1.5}
+.opt input{margin-top:4px;width:18px;height:18px;accent-color:var(--celadon);flex:0 0 auto}
+.opt.on{border-color:var(--celadon);background:var(--celadon-soft)}
+.opt.direct{border-style:dashed}
+.frame{font-size:14px;color:var(--clay);background:var(--clay-soft);border-radius:6px;padding:4px 8px;align-self:flex-start;cursor:pointer;border:0;font-family:inherit;text-align:left}
+.tip{font-size:15px;background:var(--celadon-soft);border-radius:8px;padding:10px 12px}
+.tip b,.tip summary{color:var(--celadon)}
+.tip summary{cursor:pointer;font-weight:700}
+.tip dl{margin:8px 0;display:grid;grid-template-columns:max-content 1fr;gap:2px 10px;background:var(--paper);border-radius:6px;padding:8px 10px}
+.tip dt{color:var(--celadon);font-weight:700}.tip dd{margin:0}
+.empty{border:2px dashed var(--line);border-radius:10px;padding:26px;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center}
+.checks{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.checks li{display:flex;gap:8px;align-items:flex-start}
+.checks .mark{flex:0 0 22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;border:2px solid var(--line);color:var(--muted)}
+.checks li.done .mark{background:var(--ok);border-color:var(--ok);color:var(--paper)}
+.report{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.report h2{border-bottom:3px double var(--celadon);padding-bottom:8px}
+.report .meta{color:var(--muted);font-size:15px}
+.report section{display:flex;flex-direction:column;gap:6px}
+.report dl{margin:0;display:grid;grid-template-columns:max-content 1fr;gap:6px 12px}
+.report dt{color:var(--celadon);font-weight:700;font-size:15px;padding-top:6px}
+.report dd{margin:0;white-space:pre-wrap;min-width:0;padding-top:6px}
+.report dd.ed{padding-top:0}
+.report textarea.edit{background:transparent;border:1.5px dashed var(--line);min-height:0;padding:6px 8px;resize:none;overflow:hidden;line-height:1.6}
+.report textarea.edit:focus{border-style:solid;border-color:var(--celadon);background:var(--bg)}
+.confirm{flex-direction:row;align-items:center;gap:10px;cursor:pointer;font-weight:700}
+.confirm input{width:22px;height:22px;accent-color:var(--celadon)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:15px;z-index:20;max-width:calc(100% - 32px)}
+.key{border-collapse:collapse;width:100%;font-size:15px}
+.key td,.key th{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.key th{color:var(--muted);font-weight:400;font-size:14px}
+.k-good{color:var(--ok);font-weight:700;white-space:nowrap}.k-trap{color:var(--clay);font-weight:700;white-space:nowrap}
+@media (max-width:520px){.report dl{grid-template-columns:1fr}.report dt{margin-top:6px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <h1><small>5학년 사회 · 고려 시대 사람들의 문화</small>고려 문화 탐구실</h1>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-lib" aria-selected="true">① 글 읽기</button>
+    <button class="tab" role="tab" id="tab-write" aria-selected="false">② 보고서 쓰기</button>
+    <button class="tab" role="tab" id="tab-done" aria-selected="false">③ 고치고 제출하기</button>
+    <button class="tab" role="tab" id="tab-teacher" aria-selected="false" style="margin-left:auto;font-size:15px">선생님</button>
+  </nav>
+
+  <section id="view-lib" class="stack">
+    <div id="libList" class="stack">
+      <div>
+        <h2>어떤 문화유산을 조사할까요?</h2>
+        <p class="lead">하나를 골라 글을 끝까지 읽어 보세요.</p>
+      </div>
+      <div class="grid" id="topics"></div>
+    </div>
+    <div id="libRead" class="stack" hidden></div>
+  </section>
+
+  <section id="view-write" class="picking" hidden>
+    <div id="writeBody"></div>
+  </section>
+
+  <section id="view-done" class="stack" hidden>
+    <div class="panel">
+      <h3>스스로 점검</h3>
+      <ul class="checks" id="checks"></ul>
+    </div>
+    <div id="reportBox"></div>
+    <div class="bar">
+      <span id="submitState" class="lead"></span>
+      <div class="row" style="gap:8px">
+        <button class="btn ghost" id="copyBtn">보고서 복사하기</button>
+        <button class="btn" id="submitBtn" hidden>선생님께 제출하기</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-teacher" class="stack" hidden>
+    <form id="lock" class="panel" style="max-width:360px">
+      <h3>선생님 전용</h3>
+      <label for="pw" class="lead">비밀번호를 입력하세요.</label>
+      <input type="password" id="pw" inputmode="numeric" autocomplete="off">
+      <p id="pwMsg" class="lead" style="color:var(--clay)" hidden>비밀번호가 맞지 않아요.</p>
+      <button class="btn" type="submit">들어가기</button>
+    </form>
+    <div id="tArea" class="stack" hidden></div>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ===== 설정: 설치 안내에 따라 이 두 줄만 바꾸세요 ===== */
+const SCRIPT_URL = "";   // Apps Script 웹 앱 주소 (https://script.google.com/macros/s/.../exec)
+const SHEET_URL  = "";   // 결과가 쌓이는 구글 시트 주소 (선생님 화면의 바로가기 버튼)
+const TEACHER_PW = "0520";
+/* ===================================================== */
+/* ===== 고려 문화 탐구실 · 글과 문항 =====
+   k: "good" = 알맞은 추론 / "copy" = 함정(글의 사실을 그대로 옮김) / "wrong" = 함정(글과 맞지 않음) */
+const TOPICS = [
+ {id:"celadon", name:"고려청자", tag:"공예", title:"푸른 빛깔이 천하제일, 고려청자",
+  teaser:"비색과 상감 무늬로 이름난 그릇, 누가 어떻게 썼을까요?",
+  body:[
+  "고려 사람들은 흙을 빚어 아주 뜨거운 가마에서 구운 그릇인 청자를 만들었어요. 고려청자의 은은한 푸른빛을 ‘비색’이라고 불러요. 송나라의 한 책에는 ‘고려의 비색은 천하제일’이라는 말이 적혀 있어요.",
+  "고려의 장인들은 ‘상감 기법’이라는 방법을 크게 발전시켰어요. 그릇 표면에 무늬를 파낸 뒤 그 자리에 흰 흙이나 붉은 흙을 메우고 구우면, 흰색과 검은색 무늬가 또렷하게 나타나요. 청자에는 구름 사이를 나는 학, 버드나무, 국화, 물가에서 노는 새 같은 자연의 모습이 많이 그려져 있어요.",
+  "청자는 만들기가 무척 어려웠어요. 좋은 흙을 골라야 했고, 가마의 불 온도를 알맞게 맞춰야 했어요. 그래서 전라남도 강진과 전라북도 부안처럼 좋은 흙과 땔나무가 많은 곳에서 주로 만들었어요. 만든 청자는 배에 실어 바닷길로 수도 개경까지 옮겼어요.",
+  "청자는 주로 왕실과 귀족들이 썼어요. 차를 마시는 찻잔과 주전자, 술병, 꽃병, 향을 피우는 향로뿐 아니라 베개와 의자, 심지어 지붕을 덮는 기와까지 청자로 만들었어요."],
+  qs:[
+   {q:"청자를 주로 쓴 사람들은 어떻게 생활했을까요?", opts:[
+     {t:"청자는 주로 왕실과 귀족들이 썼다.", k:"copy"},
+     {t:"왕실과 귀족들은 귀한 물건을 쓰며 넉넉하고 화려하게 생활했을 것이다.", k:"good"},
+     {t:"고려의 모든 백성이 집에서 청자 그릇으로 밥을 먹었을 것이다.", k:"wrong"},
+     {t:"귀족과 백성의 생활 모습이 많이 달랐을 것이다.", k:"good"}]},
+   {q:"청자로 만든 물건들을 보면, 고려 귀족들은 생활 속에서 무엇을 즐겼을까요?", opts:[
+     {t:"고려 사람들은 자연을 싫어했을 것이다.", k:"wrong"},
+     {t:"차를 마시며 여유로운 시간을 즐겼을 것이다.", k:"good"},
+     {t:"청자는 깨지기 쉬워서 아무도 쓰지 않았을 것이다.", k:"wrong"},
+     {t:"아름다운 물건으로 집을 꾸미는 것을 좋아했을 것이다.", k:"good"}]}]},
+ {id:"palman", name:"팔만대장경", tag:"불교 · 인쇄", title:"나라를 지키려는 마음을 새긴 팔만대장경",
+  teaser:"전쟁 중에 16년 동안 8만 장이 넘는 나무판에 글자를 새긴 이야기",
+  body:[
+  "고려 시대에 몽골 군대가 쳐들어왔어요. 몽골군은 여러 차례 고려 땅을 휩쓸었고, 대구 부인사에 보관하던 대장경도 이때 불에 타 버렸어요. 고려 왕실은 도읍을 강화도로 옮기고 몽골과의 싸움을 이어 갔어요.",
+  "고려 사람들은 부처님의 힘을 빌려 나라를 지키고자 대장경을 다시 만들기로 했어요. 1236년부터 1251년까지 16년 동안 만든 경판은 8만 장이 넘어요. 경판에 새긴 글자를 모두 합하면 5천만 자가 넘는데, 글자 모양이 마치 한 사람이 쓴 것처럼 고르고 틀린 글자도 거의 없어요.",
+  "경판을 만드는 일은 아주 오래 걸렸어요. 산에서 나무를 베어 바닷물에 담가 두었다가 꺼내 소금물에 삶고, 그늘에서 오랫동안 말렸다고 해요. 그래야 나무가 썩거나 뒤틀리지 않았거든요. 글자를 새긴 뒤에는 옻칠을 하고, 네 귀퉁이에 금속 장식을 붙여 판이 휘지 않게 했어요. 글자를 새긴 사람들이 글자 하나를 새길 때마다 절을 했다는 이야기도 전해져요.",
+  "팔만대장경은 지금 경상남도 합천 해인사의 장경판전에 보관되어 있어요. 장경판전은 창문 크기를 앞뒤로 다르게 만들어 바람이 잘 통하고 습기가 알맞게 유지돼요. 덕분에 만든 지 770년이 넘었지만 지금도 경판이 잘 남아 있어요. 팔만대장경은 세계기록유산으로 인정받았어요."],
+  qs:[
+   {q:"전쟁 중에 대장경을 만든 고려 사람들은 무엇을 믿고, 어떤 마음이었을까요?", opts:[
+     {t:"고려 사람들은 불교를 깊이 믿고 부처님께 의지했을 것이다.", k:"good"},
+     {t:"1236년부터 1251년까지 16년 동안 대장경을 만들었다.", k:"copy"},
+     {t:"나라를 지키고 싶은 마음이 무척 간절했을 것이다.", k:"good"},
+     {t:"고려 사람들은 몽골과 싸울 생각이 전혀 없었을 것이다.", k:"wrong"}]},
+   {q:"8만 장이 넘는 경판을 만든 사람들은 어떻게 일했을까요?", opts:[
+     {t:"한 사람이 며칠 만에 혼자 다 만들었을 것이다.", k:"wrong"},
+     {t:"많은 사람이 오랫동안 힘을 모아 정성껏 일했을 것이다.", k:"good"},
+     {t:"대충 빨리 만들어서 틀린 글자가 많았을 것이다.", k:"wrong"},
+     {t:"글자를 고르게 새기는 뛰어난 기술자들이 있었을 것이다.", k:"good"}]}]},
+ {id:"byeokran", name:"벽란도와 국제 무역", tag:"무역 · 교류", title:"세계 상인이 모인 항구, 벽란도",
+  teaser:"아라비아 상인까지 찾아온 고려의 국제 무역항과 ‘Korea’라는 이름",
+  body:[
+  "고려의 수도 개경 가까이에는 예성강이 흘렀어요. 이 강이 바다와 만나는 곳에 ‘벽란도’라는 항구가 있었어요. 강물이 깊어 큰 배도 쉽게 들어올 수 있었어요.",
+  "벽란도에는 송나라 상인뿐 아니라 일본, 그리고 멀리 아라비아에서 온 상인들도 찾아왔어요. 많은 배와 사람들이 오가며 물건을 사고팔아 항구는 늘 북적였어요.",
+  "고려는 인삼, 종이, 먹, 붓, 나전칠기, 꽃무늬 돗자리인 화문석 등을 팔았어요. 그리고 송나라에서는 비단, 책, 약재, 도자기를, 아라비아 상인에게서는 향료와 상아 등을 사들였어요. 고려의 종이와 먹은 질이 좋아 송나라에서도 인기가 많았어요.",
+  "아라비아 상인들은 고려를 ‘코레(Corea)’라고 불렀어요. 이 이름이 서양에 전해져 오늘날 우리나라의 영어 이름 ‘코리아(Korea)’가 되었어요."],
+  qs:[
+   {q:"벽란도를 보면, 고려 사람들은 다른 나라와 어떻게 지냈을까요?", opts:[
+     {t:"고려는 다른 나라와 전혀 오가지 않았을 것이다.", k:"wrong"},
+     {t:"여러 나라 사람들과 활발하게 교류했을 것이다.", k:"good"},
+     {t:"벽란도에는 아라비아 상인들도 찾아왔다.", k:"copy"},
+     {t:"개경 사람들은 다른 나라의 물건과 사람을 자주 보았을 것이다.", k:"good"}]},
+   {q:"고려의 종이와 먹이 송나라에서 인기가 많았던 것을 보면, 무엇을 알 수 있을까요?", opts:[
+     {t:"고려에는 물건을 잘 만드는 기술자가 많았을 것이다.", k:"good"},
+     {t:"고려 사람들은 글을 전혀 쓰지 않았을 것이다.", k:"wrong"},
+     {t:"고려 사람들은 잘 만든 물건을 팔고 필요한 물건을 사 오며 살았을 것이다.", k:"good"},
+     {t:"고려는 모든 물건을 송나라에서 사 와야만 했을 것이다.", k:"wrong"}]}]},
+ {id:"najeon", name:"나전칠기", tag:"공예", title:"조개껍데기로 빛을 새긴 나전칠기",
+  teaser:"손톱보다 작은 조각 수만 개를 붙여 만든 반짝이는 상자",
+  body:[
+  "나전칠기는 ‘나전’과 ‘칠기’를 합친 말이에요. 나전은 전복이나 조개껍데기를 얇게 갈아 무늬 모양으로 오려 붙이는 것이고, 칠기는 옻나무 진액인 옻칠을 여러 번 발라 만든 물건이에요.",
+  "고려의 장인들은 조개껍데기를 종이처럼 얇게 갈고, 아주 작은 조각으로 잘라 국화나 넝쿨 무늬를 만들었어요. 손톱보다 작은 조각 수만 개를 하나하나 붙인 작품도 있어요. 옻칠은 한 번 바르고 마를 때까지 기다렸다가 다시 바르기를 여러 번 되풀이해야 해서, 작품 하나를 만드는 데 오랜 시간이 걸렸어요.",
+  "고려 사람들은 나전칠기로 불교 경전을 담는 상자, 화장품을 담는 상자, 염주를 넣는 함 등을 만들었어요. 빛을 받으면 조개껍데기가 무지갯빛으로 반짝여 무척 화려해요.",
+  "고려에 왔던 송나라 사신 서긍은 고려의 나전 솜씨가 매우 세밀하여 귀하다고 기록했어요. 고려 나전칠기는 지금 세계에 20점 정도만 남아 있어 아주 귀하게 여겨져요. 2020년에는 일본에 있던 고려 나전칠기 상자 하나를 우리나라로 되찾아 오기도 했어요."],
+  qs:[
+   {q:"나전칠기를 만든 장인들은 어떻게 일했을까요?", opts:[
+     {t:"조개껍데기를 얇게 갈아 붙이고 옻칠을 했다.", k:"copy"},
+     {t:"기계로 하루 만에 많이 찍어 냈을 것이다.", k:"wrong"},
+     {t:"오랜 시간 끈기 있게 정성을 들여 일했을 것이다.", k:"good"},
+     {t:"아주 섬세한 손재주를 가진 장인들이 있었을 것이다.", k:"good"}]},
+   {q:"나전칠기로 만든 물건들을 보면, 고려 사람들의 생활은 어땠을까요?", opts:[
+     {t:"불교를 믿어 경전을 소중하게 보관했을 것이다.", k:"good"},
+     {t:"나전칠기는 흔해서 아무도 귀하게 여기지 않았을 것이다.", k:"wrong"},
+     {t:"화장품 상자를 꾸밀 만큼 몸을 단장하는 것을 중요하게 여겼을 것이다.", k:"good"},
+     {t:"고려 사람들은 바다에 가 본 적이 없었을 것이다.", k:"wrong"}]}]},
+ {id:"eunjin", name:"관촉사 석조미륵보살입상", tag:"불교 · 조각", title:"아파트 6층 높이의 돌부처, 은진미륵",
+  teaser:"37년 동안 만든 거대하고 개성 있는 고려의 돌불상",
+  body:[
+  "충청남도 논산의 관촉사에는 높이가 약 18미터나 되는 커다란 돌부처가 서 있어요. 아파트 6층쯤 되는 높이로, 우리나라에서 가장 큰 돌불상 가운데 하나예요. 사람들은 이 불상을 ‘은진미륵’이라고도 불러요.",
+  "이 불상은 고려 초에 만들었어요. 기록에 따르면 968년에 시작해 37년 동안 만들었다고 해요. 거대한 돌 여러 덩이를 다듬어 쌓아 올렸는데, 흙을 쌓아 비탈을 만들고 그 위로 돌을 끌어올렸다는 이야기가 전해져요.",
+  "생김새도 독특해요. 몸에 비해 얼굴과 머리가 아주 크고, 머리에는 높은 관을 쓰고 있어요. 눈과 귀, 입도 크게 표현했어요. 균형 잡힌 신라의 석굴암 불상과는 많이 달라요. 이 지역의 힘 있는 사람들과 백성들이 자신들만의 개성 있는 불상을 만든 것으로 보여요.",
+  "미륵은 먼 미래에 나타나 사람들을 구해 준다고 믿었던 부처예요. 고려 사람들은 미륵불에게 어려움이 없는 좋은 세상이 오기를 빌었어요. 이 불상은 2018년 국보로 지정되었어요."],
+  qs:[
+   {q:"18미터나 되는 돌불상을 만들 때, 사람들은 어떻게 했을까요?", opts:[
+     {t:"크레인 같은 기계로 쉽게 쌓아 올렸을 것이다.", k:"wrong"},
+     {t:"많은 사람이 오랫동안 힘을 모아 함께 일했을 것이다.", k:"good"},
+     {t:"968년에 시작해 37년 동안 만들었다.", k:"copy"},
+     {t:"무거운 돌을 옮기고 쌓는 지혜와 기술이 있었을 것이다.", k:"good"}]},
+   {q:"사람들이 미륵불에게 빈 소원을 보면, 그때 사람들의 마음은 어땠을까요?", opts:[
+     {t:"지금보다 더 좋은 세상이 오기를 간절히 바랐을 것이다.", k:"good"},
+     {t:"미륵은 먼 미래에 나타나 사람들을 구해 준다고 믿었던 부처이다.", k:"copy"},
+     {t:"사람들은 아무 걱정 없이 살아서 바라는 것이 없었을 것이다.", k:"wrong"},
+     {t:"그 지역 사람들은 자기 고장의 개성 있는 불상을 자랑스럽게 여겼을 것이다.", k:"good"}]}]}
+];
+
+const T=Object.fromEntries(TOPICS.map(t=>[t.id,t]));
+const KIND_LABEL={good:"선택-알맞음",copy:"선택-사실 옮김(함정)",wrong:"선택-글과 맞지 않음(함정)",direct:"직접 씀"};
+const KEY="goryeo-report-draft-v3";
+let state={topic:null,ban:"",num:"",name:"",ans:{},mood:"",feel:"",revised:false,submittedAt:null};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(s&&typeof s==="object")state=Object.assign(state,s);}catch(e){}
+if(state.topic&&!T[state.topic])state.topic=null;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+function answers(){if(!state.topic)return[];return state.ans[state.topic]||(state.ans[state.topic]=T[state.topic].qs.map(()=>({choice:null,custom:"",fact:"",reason:""})));}
+let activeQ=0;
+
+const $=s=>document.querySelector(s);
+function el(tag,attrs={},...kids){const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs)){if(k==="class")e.className=v;else if(k==="text")e.textContent=v;else if(v!==false&&v!=null)e.setAttribute(k,v===true?"":v);}for(const c of kids){if(c!=null)e.append(c);}return e;}
+function btn(text,cls,fn){const b=el("button",{type:"button",class:cls,text});b.addEventListener("click",fn);return b;}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2600);}
+const sentences=p=>p.split(/(?<=[.?!])\s+/).filter(Boolean);
+const filled=s=>{s=(s||"").trim();return s.length>=6&&!/\(\s*\)/.test(s);};
+
+/* 답 해석 */
+function kindOf(t,qi,a){if(a.choice==null)return null;if(a.choice==="direct")return"direct";const o=t.qs[qi].opts[a.choice];return o?o.k:null;}
+function inferText(t,qi,a){if(a.choice==="direct")return a.custom||"";const o=t.qs[qi].opts[a.choice];return o?o.t:"";}
+function qComplete(t,qi,a){const k=kindOf(t,qi,a);if(!k)return false;if(k==="direct"&&!filled(a.custom))return false;return filled(a.fact)&&filled(a.reason);}
+function levelHint(){const t=T[state.topic];if(!t)return"";const as=answers();
+  const done=as.map((a,i)=>qComplete(t,i,a));const kinds=as.map((a,i)=>kindOf(t,i,a));
+  const trap=kinds.some(k=>k==="copy"||k==="wrong");
+  if(!done[0]&&!done[1]||trap)return"하 후보";
+  if(done.every(Boolean)&&kinds.includes("direct")&&filled(state.mood))return"상 후보";
+  return"중 후보";}
+
+/* 탭 */
+const VIEWS={lib:"#view-lib",write:"#view-write",done:"#view-done",teacher:"#view-teacher"};
+function show(v){for(const[k,sel]of Object.entries(VIEWS)){$(sel).hidden=k!==v;$("#tab-"+k).setAttribute("aria-selected",k===v);}
+  if(v==="lib")renderLib();if(v==="write")renderWrite();if(v==="done")renderDone();if(v==="teacher")renderTeacher();window.scrollTo({top:0});}
+for(const k of Object.keys(VIEWS))$("#tab-"+k).addEventListener("click",()=>show(k));
+
+/* 글 */
+function usedSet(t){const txt=answers().map(a=>a.fact).join("\n");const set=new Set();t.body.forEach(p=>sentences(p).forEach(s=>{if(txt.includes(s))set.add(s);}));return set;}
+function articleNode(t,clickable){
+  const used=state.topic===t.id?usedSet(t):new Set();
+  const art=el("article",{class:"article"},el("div",{class:"tag",text:t.tag}),el("h2",{text:t.title}));
+  t.body.forEach(p=>{const para=el("p");sentences(p).forEach((s,i,arr)=>{
+    const sp=el("span",{class:"s"+(used.has(s)?" used":""),text:s});
+    if(clickable){sp.setAttribute("role","button");sp.tabIndex=0;const go=()=>useSentence(s);
+      sp.addEventListener("click",go);sp.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go();}});}
+    para.append(sp);if(i<arr.length-1)para.append(" ");});art.append(para);});
+  return art;}
+
+let reading=null;
+function renderLib(){
+  const g=$("#topics");g.textContent="";
+  for(const t of TOPICS){const b=el("button",{type:"button",class:"topic"+(state.topic===t.id?" chosen":"")},
+      el("span",{class:"tag",text:t.tag}),el("h3",{text:t.name}),el("span",{class:"teaser",text:t.teaser}));
+    b.addEventListener("click",()=>{reading=t.id;renderLib();window.scrollTo({top:0});});g.append(b);}
+  $("#libList").hidden=!!reading;const rd=$("#libRead");rd.hidden=!reading;rd.textContent="";
+  if(reading){const t=T[reading];
+    rd.append(el("div",{},btn("← 다른 문화유산 보기","btn ghost small",()=>{reading=null;renderLib();})),articleNode(t,false),
+      el("div",{class:"bar"},el("span",{class:"lead",text:state.topic===t.id?"이 글로 보고서를 쓰고 있어요.":"다 읽었으면 보고서를 써 볼까요?"}),
+        btn("이 글로 보고서 쓰기 →","btn",()=>{state.topic=t.id;answers();activeQ=0;save();reading=null;show("write");})));}}
+
+/* 보고서 쓰기 */
+function useSentence(s){const as=answers();if(!as.length)return;const a=as[activeQ];
+  if(a.fact.includes(s)){a.fact=a.fact.replace(s,"").replace(/\s{2,}/g," ").trim();toast(`문항 ${activeQ+1}의 근거에서 뺐어요.`);}
+  else{a.fact=(a.fact.trim()?a.fact.trim()+" ":"")+s;toast(`문항 ${activeQ+1}의 근거 칸에 넣었어요.`);}
+  save();renderWrite(true);}
+function setActive(i){if(activeQ===i)return;activeQ=i;document.querySelectorAll(".qcard").forEach((n,j)=>n.classList.toggle("active",j===i));}
+function inputLabel(id,label,type,key,grow){const i=el("input",{type,id});if(type==="number"){i.setAttribute("inputmode","numeric");i.min=1;}
+  i.value=state[key]||"";i.addEventListener("input",()=>{state[key]=i.value;save();});return el("label",{for:id,style:grow?"flex:2 1 140px":null},label,i);}
+function area(id,val,on,frame){const ta=el("textarea",{id});ta.value=val||"";ta.addEventListener("input",()=>on(ta.value));
+  const wrap=[];if(frame)wrap.push(btn("도움말: "+frame,"frame",()=>{if(!ta.value.trim()){ta.value=frame;on(ta.value);}ta.focus();}));wrap.push(ta);return wrap;}
+function exampleNode(){return el("details",{class:"tip"},el("summary",{text:"예시 보기"}),
+  el("p",{style:"margin-top:8px",text:"고려 이야기가 아닌 연습 예시예요. ‘보이는 사실’에서 ‘보이지 않는 생활’을 생각해 내는 방법을 살펴봐요."}),
+  el("dl",{},el("dt",{text:"근거"}),el("dd",{text:"우리 반 사물함 위에 축구공이 다섯 개나 있다."}),
+    el("dt",{text:"추론"}),el("dd",{text:"우리 반 친구들은 쉬는 시간에 축구를 즐겨 할 것이다."}),
+    el("dt",{text:"까닭"}),el("dd",{text:"왜냐하면 공이 많다는 것은 자주 쓴다는 뜻이기 때문이다."})),
+  el("p",{text:"‘축구공이 다섯 개 있다’는 눈에 보이는 사실이라 추론이 아니에요. 추론은 그 사실을 보고 ‘그래서 어땠을 것이다’라고 생각한 것이에요."}));}
+function renderWrite(keep){
+  const box=$("#writeBody");const y=window.scrollY;const rdr=box.querySelector(".reader");const ry=rdr?rdr.scrollTop:0;box.textContent="";
+  if(!state.topic){box.append(el("div",{class:"empty"},el("p",{text:"먼저 ‘글 읽기’에서 조사할 문화유산을 하나 골라 주세요."}),btn("글 읽기로 가기","btn ghost small",()=>show("lib"))));return;}
+  const t=T[state.topic];const as=answers();
+  const right=el("div",{class:"stack"});
+  right.append(el("div",{class:"panel"},el("h3",{text:"내 정보"}),el("div",{class:"row"},
+    inputLabel("f-ban","반","number","ban"),inputLabel("f-num","번호","number","num"),inputLabel("f-name","이름","text","name",2))));
+  right.append(el("div",{class:"tip"},el("b",{text:"이렇게 풀어요 "}),"① 질문에 알맞은 추론을 골라요. 내 생각이 따로 있으면 ‘직접 쓸래요’를 골라요. ② 그렇게 생각한 근거 문장을 왼쪽 글에서 눌러 넣어요. ③ 왜 그렇게 생각했는지 까닭을 내 말로 써요."),exampleNode());
+  t.qs.forEach((q,qi)=>{
+    const a=as[qi];const card=el("div",{class:"qcard"+(qi===activeQ?" active":"")});
+    card.addEventListener("focusin",()=>setActive(qi));card.addEventListener("click",()=>setActive(qi));
+    card.append(el("div",{class:"qhead"},el("b",{text:`문항 ${qi+1}`}),qi>0?el("span",{class:"badge",text:"도전 · 더 자세한 보고서"}):null),
+      el("p",{class:"qtext",text:q.q}));
+    const opts=el("div",{class:"opts",role:"radiogroup"});
+    const name=`q${qi}`;
+    const mk=(val,text,extra)=>{const id=`${name}-${val}`;const r=el("input",{type:"radio",name,id,value:String(val)});r.checked=a.choice===val;
+      r.addEventListener("change",()=>{a.choice=val;save();renderWrite(true);});
+      return el("label",{class:"opt"+(a.choice===val?" on":"")+(extra||""),for:id},r,el("span",{text}));};
+    q.opts.forEach((o,oi)=>opts.append(mk(oi,o.t)));
+    opts.append(mk("direct","직접 쓸래요 (내 생각으로 추론을 써요)"," direct"));
+    const s1=el("div",{class:"step"},el("span",{class:"lab",text:"① 알맞은 추론 고르기"}),opts);
+    if(a.choice==="direct")s1.append(...area(`q${qi}-custom`,a.custom,v=>{a.custom=v;save();},"고려 사람들은 ( )했을 것이다."));
+    const s2=el("div",{class:"step"},el("label",{class:"lab",for:`q${qi}-fact`},"② 근거 문장",el("span",{class:"sub",text:" (왼쪽 글에서 문장을 누르면 들어가요)"})),...area(`q${qi}-fact`,a.fact,v=>{a.fact=v;save();}));
+    const s3=el("div",{class:"step"},el("label",{class:"lab",for:`q${qi}-reason`},"③ 까닭",el("span",{class:"sub",text:" (왜 그렇게 생각했나요?)"})),...area(`q${qi}-reason`,a.reason,v=>{a.reason=v;save();},"왜냐하면 ( ) 때문이다."));
+    card.append(s1,s2,s3);right.append(card);});
+  right.append(el("div",{class:"panel"},el("h3",{text:"고려 시대의 사회 분위기"}),
+    el("div",{class:"step"},el("label",{class:"lab",for:"f-mood"},"내가 고른 추론을 모아 보면, 고려는 어떤 사회였을까요?"),...area("f-mood",state.mood,v=>{state.mood=v;save();},"고려는 ( )을/를 소중히 여기는 사회였을 것이다.")),
+    el("div",{class:"step"},el("label",{class:"lab",for:"f-feel"},"느낀 점",el("span",{class:"sub",text:" (쓰고 싶으면 써요)"})),...area("f-feel",state.feel,v=>{state.feel=v;save();}))));
+  right.append(el("div",{class:"bar"},el("span",{class:"lead",text:"쓴 내용은 이 기기에 자동으로 저장돼요."}),btn("다 썼어요 →","btn",()=>show("done"))));
+  box.append(el("p",{class:"lead",style:"margin-bottom:12px"},`주제: ${t.name} · `,btn("주제 바꾸기","btn ghost small",()=>show("lib"))),
+    el("div",{class:"split"},el("div",{class:"reader"},articleNode(t,true)),right));
+  if(keep){window.scrollTo({top:y});const nr=box.querySelector(".reader");if(nr)nr.scrollTop=ry;}}
+
+/* 고치고 제출하기 */
+function checks(){const t=T[state.topic];const as=answers();
+  return[{t:"반, 번호, 이름을 썼어요.",ok:!!(state.ban&&state.num&&(state.name||"").trim())},
+    {t:"조사할 문화유산을 골랐어요.",ok:!!t},
+    {t:"문항 1에서 추론을 고르고, 근거와 까닭을 썼어요.",ok:!!t&&qComplete(t,0,as[0])},
+    {t:"문항 2(도전)까지 썼어요.",ok:!!t&&qComplete(t,1,as[1])},
+    {t:"고려 시대의 사회 분위기를 정리했어요.",ok:filled(state.mood)}];}
+function reportData(){const t=T[state.topic];const as=answers();
+  return{ban:String(state.ban||""),num:String(state.num||""),name:(state.name||"").trim(),topic:state.topic||"",topicName:t?t.name:"",
+    q:t?t.qs.map((q,i)=>{const a=as[i];const k=kindOf(t,i,a);return{question:q.q,mode:k?KIND_LABEL[k]:"",infer:inferText(t,i,a),fact:a.fact||"",reason:a.reason||""};}):[],
+    mood:state.mood||"",feel:state.feel||"",level:levelHint()};}
+function reportText(r){const L=["[고려의 문화와 사람들의 생활 모습 조사 보고서]",`5학년 ${r.ban}반 ${r.num}번 ${r.name}`,`주제: ${r.topicName}`,""];
+  r.q.forEach((x,i)=>{if(!x.infer&&!x.fact&&!x.reason)return;L.push(`문항 ${i+1}. ${x.question}`,`- 추론: ${x.infer}`,`- 근거: ${x.fact}`,`- 까닭: ${x.reason}`,"");});
+  L.push(`■ 고려 시대의 사회 분위기: ${r.mood}`);if(r.feel)L.push(`■ 느낀 점: ${r.feel}`);return L.join("\n");}
+function renderDone(){
+  const ul=$("#checks");ul.textContent="";for(const c of checks())ul.append(el("li",{class:c.ok?"done":""},el("span",{class:"mark",text:c.ok?"✓":""}),c.t));
+  const box=$("#reportBox");box.textContent="";const t=T[state.topic];
+  const grow=x=>{x.style.height="auto";x.style.height=x.scrollHeight+4+"px";};
+  const edit=(val,on)=>{const x=el("textarea",{class:"edit",rows:"1"});x.value=val||"";x.addEventListener("input",()=>{on(x.value);save();grow(x);});return el("dd",{class:"ed"},x);};
+  const rep=el("article",{class:"report"},el("h2",{text:"고려의 문화와 사람들의 생활 모습 조사 보고서"}),
+    el("p",{class:"meta",text:`5학년 ${state.ban||"  "}반 ${state.num||"  "}번 · ${state.name||"이름"} · 주제: ${t?t.name:"—"}`}));
+  if(!t)rep.append(el("p",{class:"lead",text:"아직 쓴 보고서가 없어요. ‘글 읽기’에서 주제를 먼저 골라 주세요."}));
+  else answers().forEach((a,i)=>{if(a.choice==null&&!a.fact.trim()&&!a.reason.trim())return;
+    rep.append(el("section",{},el("h3",{text:`문항 ${i+1}. ${t.qs[i].q}`}),el("dl",{},
+      el("dt",{text:"추론"}),a.choice==="direct"?edit(a.custom,v=>a.custom=v):el("dd",{text:inferText(t,i,a)||"— (아직 고르지 않았어요)"}),
+      el("dt",{text:"근거"}),edit(a.fact,v=>a.fact=v),
+      el("dt",{text:"까닭"}),edit(a.reason,v=>a.reason=v))));});
+  if(t)rep.append(el("section",{},el("h3",{text:"고려 시대의 사회 분위기"}),edit(state.mood,v=>state.mood=v)),
+    el("section",{},el("h3",{text:"느낀 점"}),edit(state.feel,v=>state.feel=v)));
+  const cb=el("input",{type:"checkbox",id:"revised"});cb.checked=!!state.revised;cb.addEventListener("change",()=>{state.revised=cb.checked;save();updateSubmitState();});
+  box.append(el("div",{class:"stack"},
+    el("div",{class:"panel"},el("h3",{text:"다시 읽고 고치기"}),
+      el("p",{text:"보고서를 소리 내어 천천히 읽어 보세요. 점선 칸의 글은 눌러서 바로 고칠 수 있어요."}),
+      el("ul",{style:"margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px"},
+        ...["근거는 글에 나온 문장인가요?","까닭이 ‘왜냐하면 ~ 때문이다’로 이어지나요?","내가 고른 추론과 까닭이 서로 맞나요?","문장이 너무 길거나, 같은 말이 반복되지 않나요?","띄어쓰기와 맞춤법이 어색한 곳은 없나요?"].map(x=>el("li",{text:x})))),
+    rep,el("label",{for:"revised",class:"panel confirm"},cb,"보고서를 다시 읽고 어색한 부분을 고쳤어요.")));
+  requestAnimationFrame(()=>box.querySelectorAll("textarea.edit").forEach(grow));updateSubmitState();}
+function submitReady(){const c=checks();return c[0].ok&&c[1].ok&&c[2].ok&&!!state.revised;}
+function updateSubmitState(){const s=$("#submitState"),b=$("#submitBtn");const rev=!!state.revised;
+  $("#copyBtn").disabled=!rev;
+  if(!SCRIPT_URL){b.hidden=true;s.textContent=rev?"‘보고서 복사하기’를 눌러 패들렛에 올려 주세요.":"보고서를 다시 읽고 고친 뒤, 아래 칸에 체크해 주세요.";return;}
+  b.hidden=false;b.disabled=!submitReady();
+  s.textContent=!rev?"다시 읽고 고친 뒤 체크해야 제출할 수 있어요.":!checks()[0].ok?"반, 번호, 이름을 써 주세요.":!checks()[2].ok?"문항 1을 끝까지 써야 제출할 수 있어요."
+    :state.submittedAt?`제출했어요 (${new Date(state.submittedAt).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}). 고친 뒤 다시 제출하면 새 내용으로 바뀌어요.`:"준비됐어요. 제출해 주세요.";}
+$("#copyBtn").addEventListener("click",async()=>{const txt=reportText(reportData());
+  try{await navigator.clipboard.writeText(txt);toast("복사했어요. 패들렛에 붙여 넣어 주세요.");}
+  catch(e){const ta=el("textarea",{style:"position:fixed;opacity:0"});ta.value=txt;document.body.append(ta);ta.select();try{document.execCommand("copy");toast("복사했어요.");}catch(_){toast("복사가 안 돼요. 선생님께 말씀드려요.");}ta.remove();}});
+$("#submitBtn").addEventListener("click",async()=>{const b=$("#submitBtn");b.disabled=true;$("#submitState").textContent="제출하는 중이에요…";
+  const body=JSON.stringify(reportData());let ok=false;
+  try{const res=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body});const j=await res.json();ok=!!j.ok;}
+  catch(e){try{await fetch(SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body});ok=true;}catch(_){ok=false;}}
+  if(ok){state.submittedAt=Date.now();save();toast("선생님께 제출했어요!");}else toast("제출하지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.");
+  updateSubmitState();});
+
+/* 선생님 */
+let unlocked=false;try{unlocked=sessionStorage.getItem("goryeo-t")==="1";}catch(e){}
+$("#lock").addEventListener("submit",e=>{e.preventDefault();
+  if($("#pw").value===TEACHER_PW){unlocked=true;try{sessionStorage.setItem("goryeo-t","1");}catch(_){}$("#pw").value="";$("#pwMsg").hidden=true;renderTeacher();}
+  else{$("#pwMsg").hidden=false;$("#pw").select();}});
+function renderTeacher(){$("#lock").hidden=unlocked;const a=$("#tArea");a.hidden=!unlocked;if(!unlocked)return;a.textContent="";
+  a.append(el("div",{class:"panel"},el("h2",{text:"제출 결과 보기"}),
+    SHEET_URL?el("a",{class:"btn",href:SHEET_URL,target:"_blank",rel:"noopener",style:"align-self:flex-start",text:"구글 시트 열기 ↗"})
+      :el("p",{class:"lead",text:"아직 시트 주소가 연결되지 않았어요. 설치 안내의 5단계에서 SHEET_URL을 넣어 주세요."}),
+    el("p",{text:"시트의 ‘문항 방식’ 열에는 학생이 직접 썼는지, 알맞은 선택지를 골랐는지, 함정을 골랐는지가 적혀요. ‘참고 수준’은 아래 기준으로 자동 계산한 것이니, 까닭을 읽어 보고 ‘선생님 평가’ 열에 최종 평가를 적어 주세요."}),
+    el("table",{class:"key"},el("tr",{},el("th",{text:"참고 수준"}),el("th",{text:"자동 기준"})),
+      el("tr",{},el("td",{text:"상 후보"}),el("td",{text:"두 문항 모두 완성 + 함정 없음 + 직접 쓴 추론 1개 이상 + 사회 분위기 작성"})),
+      el("tr",{},el("td",{text:"중 후보"}),el("td",{text:"함정 없이 1문항 이상 완성 (선택지를 골라 근거·까닭 작성)"})),
+      el("tr",{},el("td",{text:"하 후보"}),el("td",{text:"함정 선택지를 골랐거나, 완성한 문항이 없음"})))));
+  const key=el("div",{class:"panel"},el("h3",{text:"문항별 정답·함정 표"}));
+  TOPICS.forEach(t=>{key.append(el("p",{style:"font-weight:700;margin-top:6px",text:t.name}));
+    t.qs.forEach((q,qi)=>{const tb=el("table",{class:"key"},el("tr",{},el("th",{text:`문항 ${qi+1}. ${q.q}`}),el("th",{text:""})));
+      q.opts.forEach(o=>tb.append(el("tr",{},el("td",{text:o.t}),el("td",{class:o.k==="good"?"k-good":"k-trap",text:o.k==="good"?"알맞음":o.k==="copy"?"함정·사실 옮김":"함정·글과 맞지 않음"}))));key.append(tb);});});
+  a.append(key);}
+
+renderLib();
+</script>
+
+</body>
+</html>
