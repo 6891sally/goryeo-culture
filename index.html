@@ -109,6 +109,14 @@ textarea{min-height:72px;resize:vertical;line-height:1.55}
 .key td,.key th{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
 .key th{color:var(--muted);font-weight:400;font-size:14px}
 .k-good{color:var(--ok);font-weight:700;white-space:nowrap}.k-trap{color:var(--clay);font-weight:700;white-space:nowrap}
+.mk{display:inline-block;font-size:14px;margin-top:2px;padding:1px 8px;border-radius:999px}
+.mk-ok{background:var(--celadon-soft);color:var(--ok)}.mk-mid{background:var(--hl);color:var(--ink)}.mk-bad{background:var(--clay-soft);color:var(--clay)}
+.lv{display:inline-block;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--line);color:var(--ink);white-space:nowrap}
+.lv-상{background:var(--celadon);color:var(--paper)}.lv-중{background:var(--celadon-soft);color:var(--celadon)}.lv-하{background:var(--clay-soft);color:var(--clay)}
+.judge{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:6px}
+.judge dl{margin:0;display:grid;grid-template-columns:max-content 1fr;gap:6px 12px}
+.judge dt{color:var(--celadon);font-weight:700}.judge dd{margin:0;min-width:0}
+@media (max-width:520px){.judge dl{grid-template-columns:1fr}}
 @media (max-width:520px){.report dl{grid-template-columns:1fr}.report dt{margin-top:6px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -171,8 +179,8 @@ textarea{min-height:72px;resize:vertical;line-height:1.55}
 
 <script>
 /* ===== 설정: 설치 안내에 따라 이 두 줄만 바꾸세요 ===== */
-const SCRIPT_URL = "https://script.google.com/u/0/home/projects/1YXb48eVNAA6J9KLk76AXqcmBK7Gbemc7EgjiMRXlkOkrqYKrJk8ju6k9/edit";   // Apps Script 웹 앱 주소 (https://script.google.com/macros/s/.../exec)
-const SHEET_URL  = "https://docs.google.com/spreadsheets/d/1qGYl-C2JKqi8D4MRhI6x0dzhKPx9pX1kRcP4HCzT9y8/edit?gid=0#gid=0";   // 결과가 쌓이는 구글 시트 주소 (선생님 화면의 바로가기 버튼)
+const SCRIPT_URL = "";   // Apps Script 웹 앱 주소 (https://script.google.com/macros/s/.../exec)
+const SHEET_URL  = "";   // 결과가 쌓이는 구글 시트 주소 (선생님 화면의 바로가기 버튼)
 const TEACHER_PW = "0520";
 /* ===================================================== */
 /* ===== 고려 문화 탐구실 · 글과 문항 =====
@@ -188,14 +196,14 @@ const TOPICS = [
   qs:[
    {q:"청자를 주로 쓴 사람들은 어떻게 생활했을까요?", opts:[
      {t:"청자는 주로 왕실과 귀족들이 썼다.", k:"copy"},
-     {t:"왕실과 귀족들은 귀한 물건을 쓰며 넉넉하고 화려하게 생활했을 것이다.", k:"good"},
+     {t:"왕실과 귀족들은 귀한 물건을 쓰며 넉넉하고 화려하게 생활했을 것이다.", k:"good", ev:["왕실과 귀족들이 썼어요", "기와까지 청자로", "만들기가 무척 어려웠어요", "천하제일"]},
      {t:"고려의 모든 백성이 집에서 청자 그릇으로 밥을 먹었을 것이다.", k:"wrong"},
-     {t:"귀족과 백성의 생활 모습이 많이 달랐을 것이다.", k:"good"}]},
+     {t:"귀족과 백성의 생활 모습이 많이 달랐을 것이다.", k:"good", ev:["왕실과 귀족들이 썼어요", "만들기가 무척 어려웠어요"]}]},
    {q:"청자로 만든 물건들을 보면, 고려 귀족들은 생활 속에서 무엇을 즐겼을까요?", opts:[
      {t:"고려 사람들은 자연을 싫어했을 것이다.", k:"wrong"},
-     {t:"차를 마시며 여유로운 시간을 즐겼을 것이다.", k:"good"},
+     {t:"차를 마시며 여유로운 시간을 즐겼을 것이다.", k:"good", ev:["찻잔과 주전자"]},
      {t:"청자는 깨지기 쉬워서 아무도 쓰지 않았을 것이다.", k:"wrong"},
-     {t:"아름다운 물건으로 집을 꾸미는 것을 좋아했을 것이다.", k:"good"}]}]},
+     {t:"아름다운 물건으로 집을 꾸미는 것을 좋아했을 것이다.", k:"good", ev:["꽃병", "향로", "기와까지", "베개와 의자", "자연의 모습"]}]}]},
  {id:"palman", name:"팔만대장경", tag:"불교 · 인쇄", title:"나라를 지키려는 마음을 새긴 팔만대장경",
   teaser:"전쟁 중에 16년 동안 8만 장이 넘는 나무판에 글자를 새긴 이야기",
   body:[
@@ -205,15 +213,15 @@ const TOPICS = [
   "팔만대장경은 지금 경상남도 합천 해인사의 장경판전에 보관되어 있어요. 장경판전은 창문 크기를 앞뒤로 다르게 만들어 바람이 잘 통하고 습기가 알맞게 유지돼요. 덕분에 만든 지 770년이 넘었지만 지금도 경판이 잘 남아 있어요. 팔만대장경은 세계기록유산으로 인정받았어요."],
   qs:[
    {q:"전쟁 중에 대장경을 만든 고려 사람들은 무엇을 믿고, 어떤 마음이었을까요?", opts:[
-     {t:"고려 사람들은 불교를 깊이 믿고 부처님께 의지했을 것이다.", k:"good"},
+     {t:"고려 사람들은 불교를 깊이 믿고 부처님께 의지했을 것이다.", k:"good", ev:["부처님의 힘을 빌려", "절을 했다"]},
      {t:"1236년부터 1251년까지 16년 동안 대장경을 만들었다.", k:"copy"},
-     {t:"나라를 지키고 싶은 마음이 무척 간절했을 것이다.", k:"good"},
+     {t:"나라를 지키고 싶은 마음이 무척 간절했을 것이다.", k:"good", ev:["나라를 지키고자", "싸움을 이어 갔어요", "몽골 군대가 쳐들어왔어요", "불에 타 버렸어요"]},
      {t:"고려 사람들은 몽골과 싸울 생각이 전혀 없었을 것이다.", k:"wrong"}]},
    {q:"8만 장이 넘는 경판을 만든 사람들은 어떻게 일했을까요?", opts:[
      {t:"한 사람이 며칠 만에 혼자 다 만들었을 것이다.", k:"wrong"},
-     {t:"많은 사람이 오랫동안 힘을 모아 정성껏 일했을 것이다.", k:"good"},
+     {t:"많은 사람이 오랫동안 힘을 모아 정성껏 일했을 것이다.", k:"good", ev:["16년 동안", "8만 장이 넘어요", "5천만 자", "아주 오래 걸렸어요", "절을 했다", "오랫동안 말렸다"]},
      {t:"대충 빨리 만들어서 틀린 글자가 많았을 것이다.", k:"wrong"},
-     {t:"글자를 고르게 새기는 뛰어난 기술자들이 있었을 것이다.", k:"good"}]}]},
+     {t:"글자를 고르게 새기는 뛰어난 기술자들이 있었을 것이다.", k:"good", ev:["한 사람이 쓴 것처럼", "틀린 글자도 거의 없어요", "썩거나 뒤틀리지", "창문 크기를"]}]}]},
  {id:"byeokran", name:"벽란도와 국제 무역", tag:"무역 · 교류", title:"세계 상인이 모인 항구, 벽란도",
   teaser:"아라비아 상인까지 찾아온 고려의 국제 무역항과 ‘Korea’라는 이름",
   body:[
@@ -224,13 +232,13 @@ const TOPICS = [
   qs:[
    {q:"벽란도를 보면, 고려 사람들은 다른 나라와 어떻게 지냈을까요?", opts:[
      {t:"고려는 다른 나라와 전혀 오가지 않았을 것이다.", k:"wrong"},
-     {t:"여러 나라 사람들과 활발하게 교류했을 것이다.", k:"good"},
+     {t:"여러 나라 사람들과 활발하게 교류했을 것이다.", k:"good", ev:["아라비아에서 온 상인", "송나라 상인뿐", "늘 북적였어요", "Corea", "사들였어요"]},
      {t:"벽란도에는 아라비아 상인들도 찾아왔다.", k:"copy"},
-     {t:"개경 사람들은 다른 나라의 물건과 사람을 자주 보았을 것이다.", k:"good"}]},
+     {t:"개경 사람들은 다른 나라의 물건과 사람을 자주 보았을 것이다.", k:"good", ev:["개경 가까이", "늘 북적였어요", "아라비아에서 온 상인"]}]},
    {q:"고려의 종이와 먹이 송나라에서 인기가 많았던 것을 보면, 무엇을 알 수 있을까요?", opts:[
-     {t:"고려에는 물건을 잘 만드는 기술자가 많았을 것이다.", k:"good"},
+     {t:"고려에는 물건을 잘 만드는 기술자가 많았을 것이다.", k:"good", ev:["질이 좋아", "인기가 많았어요"]},
      {t:"고려 사람들은 글을 전혀 쓰지 않았을 것이다.", k:"wrong"},
-     {t:"고려 사람들은 잘 만든 물건을 팔고 필요한 물건을 사 오며 살았을 것이다.", k:"good"},
+     {t:"고려 사람들은 잘 만든 물건을 팔고 필요한 물건을 사 오며 살았을 것이다.", k:"good", ev:["팔았어요", "사들였어요", "사고팔아"]},
      {t:"고려는 모든 물건을 송나라에서 사 와야만 했을 것이다.", k:"wrong"}]}]},
  {id:"najeon", name:"나전칠기", tag:"공예", title:"조개껍데기로 빛을 새긴 나전칠기",
   teaser:"손톱보다 작은 조각 수만 개를 붙여 만든 반짝이는 상자",
@@ -243,12 +251,12 @@ const TOPICS = [
    {q:"나전칠기를 만든 장인들은 어떻게 일했을까요?", opts:[
      {t:"조개껍데기를 얇게 갈아 붙이고 옻칠을 했다.", k:"copy"},
      {t:"기계로 하루 만에 많이 찍어 냈을 것이다.", k:"wrong"},
-     {t:"오랜 시간 끈기 있게 정성을 들여 일했을 것이다.", k:"good"},
-     {t:"아주 섬세한 손재주를 가진 장인들이 있었을 것이다.", k:"good"}]},
+     {t:"오랜 시간 끈기 있게 정성을 들여 일했을 것이다.", k:"good", ev:["오랜 시간이 걸렸어요", "여러 번 되풀이", "수만 개를 하나하나"]},
+     {t:"아주 섬세한 손재주를 가진 장인들이 있었을 것이다.", k:"good", ev:["종이처럼 얇게", "손톱보다 작은", "매우 세밀하여"]}]},
    {q:"나전칠기로 만든 물건들을 보면, 고려 사람들의 생활은 어땠을까요?", opts:[
-     {t:"불교를 믿어 경전을 소중하게 보관했을 것이다.", k:"good"},
+     {t:"불교를 믿어 경전을 소중하게 보관했을 것이다.", k:"good", ev:["불교 경전을 담는 상자", "염주를 넣는 함"]},
      {t:"나전칠기는 흔해서 아무도 귀하게 여기지 않았을 것이다.", k:"wrong"},
-     {t:"화장품 상자를 꾸밀 만큼 몸을 단장하는 것을 중요하게 여겼을 것이다.", k:"good"},
+     {t:"화장품 상자를 꾸밀 만큼 몸을 단장하는 것을 중요하게 여겼을 것이다.", k:"good", ev:["화장품을 담는 상자", "무척 화려해요"]},
      {t:"고려 사람들은 화려하게 반짝이는 물건을 싫어했을 것이다.", k:"wrong"}]}]},
  {id:"eunjin", name:"관촉사 석조미륵보살입상", tag:"불교 · 조각", title:"아파트 6층 높이의 돌부처, 은진미륵",
   teaser:"37년 동안 만든 거대하고 개성 있는 고려의 돌불상",
@@ -260,14 +268,14 @@ const TOPICS = [
   qs:[
    {q:"18미터나 되는 돌불상을 만들 때, 사람들은 어떻게 했을까요?", opts:[
      {t:"크레인 같은 기계로 쉽게 쌓아 올렸을 것이다.", k:"wrong"},
-     {t:"많은 사람이 오랫동안 힘을 모아 함께 일했을 것이다.", k:"good"},
+     {t:"많은 사람이 오랫동안 힘을 모아 함께 일했을 것이다.", k:"good", ev:["37년 동안", "18미터", "거대한 돌 여러 덩이", "힘 있는 사람들과 백성들"]},
      {t:"968년에 시작해 37년 동안 만들었다.", k:"copy"},
-     {t:"무거운 돌을 옮기고 쌓는 지혜와 기술이 있었을 것이다.", k:"good"}]},
+     {t:"무거운 돌을 옮기고 쌓는 지혜와 기술이 있었을 것이다.", k:"good", ev:["흙을 쌓아 비탈", "돌을 끌어올렸다", "거대한 돌 여러 덩이"]}]},
    {q:"사람들이 미륵불에게 빈 소원을 보면, 그때 사람들의 마음은 어땠을까요?", opts:[
-     {t:"그때 사람들의 생활에는 걱정이나 어려운 일이 많았을 것이다.", k:"good"},
+     {t:"그때 사람들의 생활에는 걱정이나 어려운 일이 많았을 것이다.", k:"good", ev:["좋은 세상이 오기를 빌었어요", "사람들을 구해 준다고"]},
      {t:"미륵은 먼 미래에 나타나 사람들을 구해 준다고 믿었던 부처이다.", k:"copy"},
      {t:"사람들은 아무 걱정 없이 살아서 바라는 것이 없었을 것이다.", k:"wrong"},
-     {t:"그 지역 사람들은 자기 고장의 개성 있는 불상을 자랑스럽게 여겼을 것이다.", k:"good"}]}]}
+     {t:"그 지역 사람들은 자기 고장의 개성 있는 불상을 자랑스럽게 여겼을 것이다.", k:"good", ev:["자신들만의 개성 있는", "독특해요", "석굴암 불상과는 많이 달라요"]}]}]}
 ];
 
 const T=Object.fromEntries(TOPICS.map(t=>[t.id,t]));
@@ -436,20 +444,133 @@ let unlocked=false;try{unlocked=sessionStorage.getItem("goryeo-t")==="1";}catch(
 $("#lock").addEventListener("submit",e=>{e.preventDefault();
   if($("#pw").value===TEACHER_PW){unlocked=true;try{sessionStorage.setItem("goryeo-t","1");}catch(_){}$("#pw").value="";$("#pwMsg").hidden=true;renderTeacher();}
   else{$("#pwMsg").hidden=false;$("#pw").select();}});
+
+/* --- 붙여 넣은 보고서 해석 --- */
+const norm=s=>(s||"").replace(/[\s.,!?'"‘’“”()·~\-]/g,"");
+const coreReason=s=>norm((s||"").replace(/왜냐하면|때문이다|때문이에요|때문입니다|때문/g,""));
+function parseReports(text){
+  const chunks=text.replace(/\r/g,"").split(/(?=\[?\s*고려의 문화와 사람들의 생활 모습 조사 보고서)/).filter(c=>/주제\s*:/.test(c));
+  return chunks.map(c=>{
+    const r={ban:"",num:"",name:"",topicName:"",q:[{},{}],mood:"",feel:""};let cur=null;
+    for(const raw of c.split("\n")){const line=raw.trim();if(!line)continue;let m;
+      if(m=line.match(/5학년\s*(\S*?)\s*반\s*(\S*?)\s*번\s*(.*)$/)){r.ban=m[1];r.num=m[2];r.name=m[3].trim();cur=null;continue;}
+      if(m=line.match(/^주제\s*:\s*(.+)$/)){r.topicName=m[1].trim();cur=null;continue;}
+      if(m=line.match(/^문항\s*([12])\s*[.)]/)){r._qi=+m[1]-1;cur=null;continue;}
+      if(m=line.match(/^[-•]?\s*(추론|근거|까닭)\s*:\s*(.*)$/)){const k={추론:"infer",근거:"fact",까닭:"reason"}[m[1]];const qi=r._qi??0;r.q[qi][k]=m[2];cur=[r.q[qi],k];continue;}
+      if(m=line.match(/^■?\s*고려 시대의 사회 분위기\s*:\s*(.*)$/)){r.mood=m[1];cur=[r,"mood"];continue;}
+      if(m=line.match(/^■?\s*느낀 점\s*:\s*(.*)$/)){r.feel=m[1];cur=[r,"feel"];continue;}
+      if(/패들렛|댓글|좋아요\s*\d|^\d+\s*(초|분|시간|일)\s*전/.test(line))continue;
+      if(cur&&!/^\[/.test(line))cur[0][cur[1]]=(cur[0][cur[1]]?cur[0][cur[1]]+" ":"")+line;}
+    return r;});
+}
+function findTopic(name){const n=norm(name);return TOPICS.find(t=>norm(t.name)===n)||TOPICS.find(t=>n&&(n.includes(norm(t.name).slice(0,4))||norm(t.name).includes(n)));}
+function judgeQ(t,qi,a){
+  const q=t.qs[qi];const out={infer:a.infer||"",fact:a.fact||"",reason:a.reason||""};
+  const body=t.body.join(" ");const sents=t.body.flatMap(p=>sentences(p));
+  // 추론
+  const ni=norm(out.infer);let opt=null;
+  if(ni)opt=q.opts.find(o=>norm(o.t)===ni)||q.opts.find(o=>{const no=norm(o.t);return Math.min(no.length,ni.length)>10&&(no.includes(ni)||ni.includes(no));});
+  if(!ni||/\(\s*\)/.test(out.infer)){out.kind="none";}
+  else if(opt){out.kind=opt.k;out.opt=opt;}
+  else if(sents.some(s=>{const ns=norm(s);return ns===ni||(ni.length>8&&(ns.includes(ni)||ni.includes(ns)));})){out.kind="copyDirect";}
+  else out.kind="direct";
+  // 근거
+  const nf=norm(out.fact);const fromText=nf.length>4&&(sents.some(s=>nf.includes(norm(s)))||sents.some(s=>norm(s).includes(nf)));
+  const evs=(opt&&opt.ev)||[];const hits=evs.filter(e=>nf.includes(norm(e)));
+  if(!nf)out.ev="none";
+  else if(!fromText)out.ev="notText";
+  else if(out.kind==="good")out.ev=hits.length?"match":"weak";
+  else out.ev="fromText";
+  // 까닭
+  const cr=coreReason(out.reason);
+  if(/\(\s*\)/.test(out.reason))out.rs="frame";else if(!cr)out.rs="none";
+  else if(norm(out.reason)===nf||norm(out.reason)===ni)out.rs="same";
+  else if(cr.length>=18)out.rs="detail";else if(cr.length>=6)out.rs="brief";else out.rs="short";
+  out.okInfer=out.kind==="good"||out.kind==="direct";
+  out.okEv=out.ev==="match"||out.ev==="weak"||out.ev==="fromText";
+  out.okRs=out.rs==="detail"||out.rs==="brief";
+  out.complete=out.okInfer&&out.okEv&&out.okRs;
+  return out;
+}
+function judgeReport(r){
+  const t=findTopic(r.topicName);if(!t)return{r,t:null};
+  const qs=[0,1].map(i=>judgeQ(t,i,r.q[i]||{}));
+  const done=qs.filter(x=>x.complete).length;
+  const traps=qs.filter(x=>x.kind==="copy"||x.kind==="wrong"||x.kind==="copyDirect").length;
+  const detailed=qs.some(x=>x.complete&&x.kind==="direct")||qs.every(x=>x.complete&&x.rs==="detail");
+  const mood=filled(r.mood);
+  let level,why;
+  if(done===0){level="하";why=traps?"함정 선택지를 골랐고, 알맞게 완성한 문항이 없어요.":"추론·근거·까닭을 모두 갖춘 문항이 없어요.";}
+  else if(done===2&&traps===0&&detailed&&mood){level="상";why="두 문항 모두 알맞은 추론에 근거와 까닭을 갖췄고, "+(qs.some(x=>x.kind==="direct")?"직접 추론을 썼어요.":"까닭을 자세히 썼어요.")+" 사회 분위기까지 정리했어요.";}
+  else{level="중";const w=[];if(done<2)w.push("한 문항만 완성");if(traps)w.push("함정 선택지 "+traps+"개");if(done===2&&!detailed)w.push("까닭이 간단함");if(!mood)w.push("사회 분위기 없음");why=w.join(", ")+"이라 중으로 보았어요.";}
+  return{r,t,qs,level,why};
+}
+const L_INFER={good:["○","알맞은 추론"],direct:["◎","직접 쓴 추론 (내용 확인)"],copy:["△","함정: 글의 사실을 그대로 옮김"],copyDirect:["△","글의 문장을 옮긴 것 같아요 (추론 아님)"],wrong:["×","함정: 글과 맞지 않음"],none:["−","추론을 쓰지 않음"]};
+const L_EV={match:["○","추론과 딱 맞는 근거"],weak:["△","글의 문장이지만 이 추론과의 연결이 약함"],fromText:["○","글에서 찾은 문장"],notText:["△","글에 그대로 있는 문장이 아님 (고쳐 썼는지 확인)"],none:["−","근거 없음"]};
+const L_RS={detail:["○","자세함"],brief:["△","간단함"],short:["×","너무 짧음"],frame:["×","도움말 빈칸 ( )이 남아 있음"],same:["×","근거나 추론을 그대로 다시 씀"],none:["−","까닭 없음"]};
+
+let analyzed=[];
 function renderTeacher(){$("#lock").hidden=unlocked;const a=$("#tArea");a.hidden=!unlocked;if(!unlocked)return;a.textContent="";
-  a.append(el("div",{class:"panel"},el("h2",{text:"제출 결과 보기"}),
-    SHEET_URL?el("a",{class:"btn",href:SHEET_URL,target:"_blank",rel:"noopener",style:"align-self:flex-start",text:"구글 시트 열기 ↗"})
-      :el("p",{class:"lead",text:"아직 시트 주소가 연결되지 않았어요. 설치 안내의 5단계에서 SHEET_URL을 넣어 주세요."}),
-    el("p",{text:"시트의 ‘문항 방식’ 열에는 학생이 직접 썼는지, 알맞은 선택지를 골랐는지, 함정을 골랐는지가 적혀요. ‘참고 수준’은 아래 기준으로 자동 계산한 것이니, 까닭을 읽어 보고 ‘선생님 평가’ 열에 최종 평가를 적어 주세요."}),
-    el("table",{class:"key"},el("tr",{},el("th",{text:"참고 수준"}),el("th",{text:"자동 기준"})),
-      el("tr",{},el("td",{text:"상 후보"}),el("td",{text:"두 문항 모두 완성 + 함정 없음 + 직접 쓴 추론 1개 이상 + 사회 분위기 작성"})),
-      el("tr",{},el("td",{text:"중 후보"}),el("td",{text:"함정 없이 1문항 이상 완성 (선택지를 골라 근거·까닭 작성)"})),
-      el("tr",{},el("td",{text:"하 후보"}),el("td",{text:"함정 선택지를 골랐거나, 완성한 문항이 없음"})))));
-  const key=el("div",{class:"panel"},el("h3",{text:"문항별 정답·함정 표"}));
+  const ta=el("textarea",{id:"pasteBox",style:"min-height:180px",placeholder:"패들렛에서 학생 보고서를 복사해 여기에 붙여 넣으세요. 여러 명을 한꺼번에 붙여 넣어도 돼요."});
+  try{ta.value=localStorage.getItem("goryeo-paste")||"";}catch(e){}
+  ta.addEventListener("input",()=>{try{localStorage.setItem("goryeo-paste",ta.value);}catch(e){}});
+  const res=el("div",{id:"aResult",class:"stack"});
+  a.append(el("div",{class:"panel"},el("h2",{text:"보고서 자동 분석"}),
+    el("p",{class:"lead",text:"학생이 ‘보고서 복사하기’로 올린 글을 그대로 붙여 넣고 분석을 누르세요. 자동 판정은 참고용이에요. 특히 ◎ 직접 쓴 추론과 까닭은 선생님이 읽고 최종 판단해 주세요."}),
+    ta,el("div",{class:"row",style:"gap:8px"},btn("분석하기","btn",()=>{analyzed=parseReports(ta.value).map(judgeReport);renderResults(res);}),
+      btn("지우기","btn ghost",()=>{ta.value="";try{localStorage.removeItem("goryeo-paste");}catch(e){}analyzed=[];renderResults(res);}))),res);
+  if(ta.value.trim()){analyzed=parseReports(ta.value).map(judgeReport);}
+  renderResults(res);
+  a.append(el("details",{class:"panel"},el("summary",{style:"cursor:pointer;font-weight:700",text:"판정 기준 보기"}),
+    el("table",{class:"key"},
+      el("tr",{},el("th",{text:"수준"}),el("th",{text:"자동 기준"})),
+      el("tr",{},el("td",{text:"상"}),el("td",{text:"두 문항 모두 완성(알맞은 추론 + 글 속 근거 + 까닭) · 함정 없음 · 직접 쓴 추론이 있거나 까닭이 모두 자세함 · 사회 분위기 작성"})),
+      el("tr",{},el("td",{text:"중"}),el("td",{text:"한 문항 이상 완성했지만 상의 조건을 다 채우지 못함 (함정을 하나 골랐어도 다른 문항을 완성하면 중)"})),
+      el("tr",{},el("td",{text:"하"}),el("td",{text:"완성한 문항이 없음 (함정만 골랐거나 근거·까닭이 빠짐)"}))),
+    el("p",{class:"lead",text:"까닭은 ‘왜냐하면, 때문이다’를 뺀 글자 수로 봐요. 18자 이상이면 자세함, 6~17자면 간단함이에요."})));
+  const key=el("details",{class:"panel"},el("summary",{style:"cursor:pointer;font-weight:700",text:"문항별 정답·함정 표 보기"}));
   TOPICS.forEach(t=>{key.append(el("p",{style:"font-weight:700;margin-top:6px",text:t.name}));
     t.qs.forEach((q,qi)=>{const tb=el("table",{class:"key"},el("tr",{},el("th",{text:`문항 ${qi+1}. ${q.q}`}),el("th",{text:""})));
-      q.opts.forEach(o=>tb.append(el("tr",{},el("td",{text:o.t}),el("td",{class:o.k==="good"?"k-good":"k-trap",text:o.k==="good"?"알맞음":o.k==="copy"?"함정·사실 옮김":"함정·글과 맞지 않음"}))));key.append(tb);});});
-  a.append(key);}
+      q.opts.forEach(o=>tb.append(el("tr",{},el("td",{text:o.t+(o.ev?`  (근거: ${o.ev.slice(0,2).join(" / ")} …)`:"")}),el("td",{class:o.k==="good"?"k-good":"k-trap",text:o.k==="good"?"알맞음":o.k==="copy"?"함정·사실 옮김":"함정·글과 맞지 않음"}))));key.append(tb);});});
+  a.append(key);
+  if(SHEET_URL)a.append(el("a",{class:"btn ghost",href:SHEET_URL,target:"_blank",rel:"noopener",style:"align-self:flex-start",text:"구글 시트 열기 ↗"}));
+}
+function mark(pair){return el("span",{class:"mk mk-"+({"○":"ok","◎":"ok","△":"mid","×":"bad","−":"bad"})[pair[0]],text:pair[0]+" "+pair[1]});}
+function renderResults(box){box.textContent="";
+  if(!analyzed.length){box.append(el("p",{class:"lead",text:"아직 분석한 보고서가 없어요."}));return;}
+  const cnt={상:0,중:0,하:0};analyzed.forEach(x=>{if(x.level)cnt[x.level]++;});
+  box.append(el("div",{class:"panel"},el("div",{class:"row",style:"justify-content:space-between;align-items:center"},
+    el("h3",{text:`${analyzed.length}명 분석 · 상 ${cnt.상} · 중 ${cnt.중} · 하 ${cnt.하}`}),
+    btn("결과 표 복사 (시트·엑셀에 붙여 넣기)","btn ghost small",copyResults)),
+    el("div",{style:"overflow-x:auto"},(()=>{const tb=el("table",{class:"key"},el("tr",{},...["반-번호","이름","주제","문항 1","문항 2","제안"].map(h=>el("th",{text:h}))));
+      analyzed.forEach((x,i)=>{const cell=q=>q?el("td",{},(q.complete?"완성 ":"미완성 ")+L_INFER[q.kind][0]+L_EV[q.ev][0]+L_RS[q.rs][0]):el("td",{text:"—"});
+        const go=el("a",{href:"#",text:x.r.name||"(이름 없음)"});go.addEventListener("click",e=>{e.preventDefault();document.getElementById("rep-"+i)?.scrollIntoView({behavior:"smooth"});});
+        tb.append(el("tr",{},el("td",{text:`${x.r.ban}-${x.r.num}`}),el("td",{},go),el("td",{text:x.t?x.t.name:"주제를 못 찾음"}),
+          cell(x.qs&&x.qs[0]),cell(x.qs&&x.qs[1]),el("td",{},el("span",{class:"lv lv-"+(x.level||"x"),text:x.level||"?"}))));});
+      return tb;})()),el("p",{class:"lead",style:"font-size:14px",text:"문항 칸의 기호 순서: 추론 · 근거 · 까닭  (○ 좋음, ◎ 직접 씀, △ 확인 필요, × 부족, − 없음)"})));
+  analyzed.forEach((x,i)=>{
+    const card=el("div",{class:"panel",id:"rep-"+i},el("div",{class:"row",style:"justify-content:space-between;align-items:baseline"},
+      el("h3",{text:`${x.r.ban}반 ${x.r.num}번 ${x.r.name} · ${x.t?x.t.name:x.r.topicName}`}),el("span",{class:"lv lv-"+(x.level||"x"),text:x.level?`제안: ${x.level}`:"분석 불가"})));
+    if(!x.t){card.append(el("p",{class:"lead",text:"주제 이름을 찾지 못했어요. ‘주제:’ 줄이 보고서에 그대로 있는지 확인해 주세요."}));box.append(card);return;}
+    card.append(el("p",{text:x.why}));
+    x.qs.forEach((q,qi)=>{const tq=x.t.qs[qi];
+      const good=tq.opts.filter(o=>o.k==="good").map(o=>o.t);
+      card.append(el("div",{class:"judge"},el("p",{style:"font-weight:700",text:`문항 ${qi+1}. ${tq.q}`}),
+        el("dl",{},
+          el("dt",{text:"추론"}),el("dd",{},el("div",{text:q.infer||"—"}),mark(L_INFER[q.kind])),
+          el("dt",{text:"근거"}),el("dd",{},el("div",{text:q.fact||"—"}),mark(L_EV[q.ev])),
+          el("dt",{text:"까닭"}),el("dd",{},el("div",{text:q.reason||"—"}),mark(L_RS[q.rs]))),
+        (q.kind!=="good"&&q.kind!=="direct")?el("p",{class:"lead",style:"font-size:14px",text:"알맞은 추론 예: "+good.join(" / ")}):null));});
+    card.append(el("p",{class:"lead",style:"font-size:15px",text:"사회 분위기: "+(x.r.mood||"— (쓰지 않음)")}));
+    box.append(card);});
+}
+function copyResults(){
+  const tag=(q,i)=>q?[L_INFER[q.kind][1],L_EV[q.ev][1],L_RS[q.rs][1]]:["","",""];
+  const rows=[["반","번호","이름","주제","문항1 추론","문항1 근거","문항1 까닭","문항2 추론","문항2 근거","문항2 까닭","제안 수준","판단 이유"]];
+  analyzed.forEach(x=>rows.push([x.r.ban,x.r.num,x.r.name,x.t?x.t.name:x.r.topicName,...tag(x.qs&&x.qs[0]),...tag(x.qs&&x.qs[1]),x.level||"",x.why||""]));
+  const tsv=rows.map(r=>r.map(c=>String(c).replace(/\t|\n/g," ")).join("\t")).join("\n");
+  navigator.clipboard.writeText(tsv).then(()=>toast("복사했어요. 시트나 엑셀에 붙여 넣으세요."),()=>{const t=el("textarea",{style:"position:fixed;opacity:0"});t.value=tsv;document.body.append(t);t.select();try{document.execCommand("copy");toast("복사했어요.");}catch(e){toast("복사가 안 돼요.");}t.remove();});
+}
 
 renderLib();
 </script>
